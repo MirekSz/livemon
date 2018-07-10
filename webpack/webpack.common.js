@@ -41,6 +41,10 @@ module.exports = {
             name: '[path][name].[ext]'
           }
         }
+      },
+      {
+        test: /\.html$/,
+        use: 'raw-loader'
       }
     ]
   }
