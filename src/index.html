@@ -1,12 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>webpack starterkit</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>livemon</title>
+    <!-- Twitter Card data -->
+    <meta name="twitter:card" value="Webpack basic starter project">
+    <meta name="Description" content="A simple webpack starter project for your basic web development needs."/>
+    <!-- Open Graph data -->
+    <meta property="og:title" content="Webpack basic starter project"/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:url" content="https://lifenautjoe.github.io/webpack-starter-basic/"/>
+    <meta property="og:image" content="https://i.snag.gy/i3eMBc.jpg"/>
+    <meta property="og:description" content="A simple webpack starter project for your basic web development needs."/>
+    <!-- Mobile header color for Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#ff4970">
+    <!-- Mobile header color Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="{{mobileHeaderColor}}">
+    <!-- Mobile header color for iOS Safari (supports black, black-translucent or default) -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700" rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <link href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" rel="stylesheet">
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.js"></script>
+    <script
+            src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular-animate.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
 </head>
 <body>
+<div class="container">
+    <div id="vkApp"></div>
+    <div ng-controller="KillersController">
+        <div class="header clearfix">
+            <nav>
+                <ul class="nav nav-pills float-right">
+                    <li class="nav-item">
+                        <a class="btn btn-default text-success" href="#"> <i
+                                class="fas fa-download"></i> New
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-default" href="#"> <i
+                                class="fas fa-download"></i> Import
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-default" href="#"> <i
+                                class="fas fa-upload"></i> Export
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <h3 class="text-muted font-italic font-weight-bold">
+                <i class="fas fa-heartbeat"></i> Live monitoring
+            </h3>
+        </div>
+        <div class="row float-right " ng-init="incidents = true">
+            <button class="btn btn-primary" ng-click="incidents = true">
+                <i class="fab fa-audible"></i>
+            </button>
+            &nbsp;
+            <button class="btn btn-success" ng-click="incidents = false">
+                <i class="fas fa-binoculars"></i>
+            </button>
+        </div>
+        <div class="row animate-show-hide" ng-show="incidents"
+             ng-if="state.killers">
+            <metric icon="'fab fa-audible'" title="'Incidents'"
+                    data="state.killers.length" differ="true"
+                    class="col-sm-12 text-center" initial-values="state.killers"/>
 
-<h1>yet another webpack starterkit!!11!</h1>
+        </div>
+        <div class=" animate-show-hide" ng-show="!incidents">
+            <div class="row">
+                <metric icon="'fas fa-sitemap'" title="'Members'" height="'200px'"
+                        data="state.members" class="col-sm-10 offset-sm-1 text-center "/>
+            </div>
+            </br>
 
+            <div class="card" ng-repeat="m in state.maps track by m.name">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">{{m.name}}</h5>
+                    <div class="row">
+                        <metric icon="'fas fa-plane'" title="'Backup'" data="m.backups"
+                                class="col-sm-3 text-center "/>
+                        <metric icon="'fas fa-archive'" title="'Local'" data="m.local"
+                                class="col-sm-3 text-center "/>
+                        <metric icon="'fas fa-database'" title="'Size'" data="m.size"
+                                class="col-sm-3 text-center "/>
+                        <metric icon="'fas fa-people-carry'" title="'Events'" data="m.events"
+                                class="col-sm-3 text-center "/>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <br></br>
+        <killers data="state.killers" title="'Killers'" show-type="filterBy"/>
+        <br></br>
+        <list data="state.membersView" title="'Members'"/>
+    </div>
+    <footer class="footer">
+        <p>&copy; Company 2017</p>
+    </footer>
+</div>
 </body>
 </html>
