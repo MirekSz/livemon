@@ -1,18 +1,6 @@
-import {createChart} from './chart';
+import {clearCurrentCharts, createChart} from './chart';
 
 let dirtyCharts = [];
-
-let restoreSavedCharts = function () {
-    let savedCharts = localStorage.getItem('livemon.saved');
-    if (savedCharts) {
-        savedCharts = JSON.parse(savedCharts);
-    } else {
-        savedCharts = [];
-    }
-    for (let save of savedCharts) {
-        updateSaveAsGUI(save);
-    }
-};
 
 export function initFormHandlers() {
     $("#chartForm").submit(handleSave);
@@ -21,25 +9,51 @@ export function initFormHandlers() {
     restoreSavedCharts();
 }
 
+function restoreSavedCharts() {
+    let savedCharts = localStorage.getItem('livemon.saved');
+    if (savedCharts) {
+        savedCharts = JSON.parse(savedCharts);
+    } else {
+        savedCharts = {};
+    }
+    for (let save of  Object.keys(savedCharts)) {
+        updateSaveAsGUI(save);
+    }
+    showLastPanel();
+}
+
+function showLastPanel() {
+    $(".dropdown-menu.saveAs a:last").click();
+}
+
 function checkLink(e) {
     let link = e.target.value;
+    let linkField = $("#chartForm input[name='link']");
     $.ajax({
         url: 'http://localhost:3000/livemon?link=' + link,
         success: function (d) {
-            $("#chartForm input[name='link']").removeClass('is-invalid');
-            $("#chartForm input[name='link']").addClass('is-valid');
+            linkField.removeClass('is-invalid');
+            linkField.addClass('is-valid');
         },
         error: function (e) {
-            $("#chartForm input[name='link']").removeClass('is-valid');
-            $("#chartForm input[name='link']").addClass('is-invalid');
+            linkField.removeClass('is-valid');
+            linkField.addClass('is-invalid');
             $(".invalid-feedback").html(e.status + ' ' + e.statusText);
         }
     });
 }
 
 function updateSaveAsGUI(name) {
-    $(".dropdown-menu.saveAs").append(`<a class="dropdown-item" href="#" onclick="showPanel(${name}}">${name}</a>`);
+    $(".dropdown-menu.saveAs").append(`<a class="dropdown-item" href="#" >${name}</a>`);
     $("#saveAsCounter").html($(".dropdown-item").length);
+    $(".dropdown-menu.saveAs a:last").click(() => {
+        $("#subname").text(` (${name})`);
+        let charts = getCharts(name);
+        clearCurrentCharts();
+        for (let chart of charts) {
+            createChart(chart);
+        }
+    });
 }
 
 function storeInLocalStorage(name) {
@@ -47,18 +61,10 @@ function storeInLocalStorage(name) {
     if (savedCharts) {
         savedCharts = JSON.parse(savedCharts);
     } else {
-        savedCharts = [];
+        savedCharts = {};
     }
-    let saveddirtyCharts = localStorage.getItem('livemon.dirtyCharts');
-    if (saveddirtyCharts) {
-        saveddirtyCharts = JSON.parse(saveddirtyCharts);
-    } else {
-        saveddirtyCharts = {};
-    }
-    savedCharts.push(name);
-    saveddirtyCharts[name] = dirtyCharts;
+    savedCharts[name] = dirtyCharts;
     localStorage.setItem('livemon.saved', JSON.stringify(savedCharts));
-    localStorage.setItem('livemon.dirtyCharts', JSON.stringify(saveddirtyCharts));
     dirtyCharts = [];
 }
 
@@ -70,6 +76,7 @@ function saveAs(e) {
     }
 }
 
+
 export function handleSave(e) {
     e.preventDefault();
     let data = $("#chartForm").serializeArray().reduce(function (previousValue, currentValue) {
@@ -79,4 +86,9 @@ export function handleSave(e) {
     createChart(data);
     dirtyCharts.push(data);
     $('#chartFormModal').modal('hide');
+}
+
+function getCharts(name) {
+    let saveddirtyCharts = JSON.parse(localStorage.getItem('livemon.saved'));
+    return saveddirtyCharts[name];
 }

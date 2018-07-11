@@ -1,7 +1,7 @@
 import '../styles/index.scss';
 import layout from '../layout.html';
 import modal from '../modal.html';
-import {handleSave, initFormHandlers} from './edition';
+import {initFormHandlers} from './edition';
 
 
 $(document).ready(() => {

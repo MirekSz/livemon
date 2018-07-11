@@ -14,6 +14,10 @@ module.exports = merge(common, {
         contentBase: dest,
         inline: true
     },
+    watchOptions: {
+        aggregateTimeout: 300,
+        poll: 1000
+    },
     plugins: [
         new Webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify('development')

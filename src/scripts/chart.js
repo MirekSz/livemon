@@ -1,5 +1,9 @@
 var chartCounter = 0;
 
+export function clearCurrentCharts() {
+    $("#charts").empty();
+}
+
 export function createChart(data) {
     $.ajax({
         url: 'http://localhost:3000/livemon?link=' + data.link,
@@ -33,10 +37,10 @@ let createDataSets = function (datasetNames) {
 function createChartInternal(data, datasetNames) {
     chartCounter++;
     $("#charts").append(`
-      <div class=" col-sm-${data.columns}" >
-    <canvas id="line-chart${chartCounter}" ></canvas>
-  </div>
-      `);
+     <div class=" col-sm-${data.columns}" >
+        <canvas id="line-chart${chartCounter}" ></canvas>
+     </div>`);
+    
     let chart = new Chart.Line(document.getElementById(`line-chart${chartCounter}`).getContext("2d"), {
         type: 'line',
         data: {
