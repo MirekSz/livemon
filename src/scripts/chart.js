@@ -36,9 +36,14 @@ function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
+let SKIP = ['memorySizeInBytes', 'hitCount', 'missCount'];
+
 let createDataSets = function (datasetNames) {
     let datasets = [];
     for (let name of datasetNames) {
+        if (SKIP.indexOf(name) !== -1) {
+            continue;
+        }
         datasets.push({label: name, data: [], borderColor: getRandomColor(), fill: false});
     }
     return datasets;
@@ -91,6 +96,9 @@ function createChartInternal(data, datasetNames, segment) {
             } else {
                 chart.data.datasets.forEach(function (dataset) {
                     let nd = dataset.data.slice(-200);
+                    if (SKIP.indexOf(dataset.label) !== -1) {
+                        return;
+                    }
                     nd.push(json[dataset.label]);
                     dataset.data = nd;
                 });
