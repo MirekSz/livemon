@@ -61,7 +61,6 @@ function createChartInternal(data, datasetNames) {
         }
     });
     setInterval(() => {
-        debugger;
         $.ajax({
             url: 'http://localhost:3000/livemon?link=' + data.link,
             success: function (json) {
