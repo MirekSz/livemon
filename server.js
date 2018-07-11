@@ -10,14 +10,18 @@ router.get('/', (req, rres, next) => {
     console.log('link: ', link);
 
     http.request(link, function (response) {
+        let str = '';
         if (response.statusCode != 200) {
             rres.sendStatus(response.statusCode);
             return;
         }
+
         response.on('data', function (chunk) {
-            console.log('chunk: ', chunk);
+            str += chunk;
+        });
+        response.on('end', function () {
             rres.setHeader('Content-Type', 'application/json');
-            rres.send(chunk);
+            rres.send(str);
         });
     }).on('error', function (e) {
         rres.status(500);
