@@ -22,6 +22,14 @@ function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
+let createDataSets = function (datasetNames) {
+    let datasets = [];
+    for (let name of datasetNames) {
+        datasets.push({label: name, data: [], borderColor: getRandomColor(), fill: false});
+    }
+    return datasets;
+};
+
 function createChartInternal(data, datasetNames) {
     chartCounter++;
     $("#charts").append(`
@@ -29,15 +37,11 @@ function createChartInternal(data, datasetNames) {
     <canvas id="line-chart${chartCounter}" ></canvas>
   </div>
       `);
-    let datasets = [];
-    for (let name of datasetNames) {
-        datasets.push({label: name, data: [], borderColor: getRandomColor(), fill: false});
-    }
     let chart = new Chart.Line(document.getElementById(`line-chart${chartCounter}`).getContext("2d"), {
         type: 'line',
         data: {
             labels: [],
-            datasets: datasets
+            datasets: createDataSets(datasetNames)
         },
         options: {
             scales:
@@ -61,7 +65,7 @@ function createChartInternal(data, datasetNames) {
         $.ajax({
             url: 'http://localhost:3000/livemon?link=' + data.link,
             success: function (json) {
-                var na = chart.data.labels.slice(-200);
+                let na = chart.data.labels.slice(-200);
                 na.push(new Date());
                 chart.data.labels = na;
                 if (isNumber(json)) {

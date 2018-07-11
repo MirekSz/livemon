@@ -1,9 +1,9 @@
 import {createChart} from './chart';
 
-
 export function initFormHandlers() {
     $("#chartForm").submit(handleSave);
     $("#chartForm input[name='link']").blur(checkLink);
+    $("#saveAs").click(saveAs);
 }
 
 function checkLink(e) {
@@ -22,6 +22,14 @@ function checkLink(e) {
     });
 }
 
+export function saveAs() {
+    let name = prompt("Please enter name");
+    $(".dropdown-menu.saveAs").append(`<a class="dropdown-item" href="#">${name}</a>`);
+
+    $("#saveAsCounter").html($(".dropdown-item").length);
+
+}
+
 export function handleSave(e) {
     e.preventDefault();
     let data = $("#chartForm").serializeArray().reduce(function (previousValue, currentValue) {
@@ -29,5 +37,5 @@ export function handleSave(e) {
         return previousValue;
     }, {});
     createChart(data);
-    $('#exampleModal').modal('hide');
+    $('#chartFormModal').modal('hide');
 }
