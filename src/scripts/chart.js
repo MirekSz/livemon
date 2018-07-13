@@ -1,7 +1,12 @@
 var chartCounter = 0;
+let currentIntervals = [];
+const MAX_ROWS = 200;
 
 export function clearCurrentCharts() {
     $("#charts").empty();
+    for (let i of currentIntervals) {
+        clearInterval(i);
+    }
 }
 
 export function createChart(data) {
@@ -25,7 +30,7 @@ function createChartsBaseOnDataType(data, json, segment) {
     } else {
         for (let key of Object.keys(json)) {
             if (isNumber(json[key])) {
-                createChartInternal(data, Object.keys(json), segment);
+                createChartInternal(data, Object.keys(json).filter(el => isNumber(json[el])), segment);
                 return;
             }
         }
@@ -37,76 +42,92 @@ function isNumber(n) {
 }
 
 let SKIP = ['memorySizeInBytes', 'hitCount', 'missCount'];
-
+const LP = 'LP';
 let createDataSets = function (datasetNames) {
-    let datasets = [];
+    let datasets = [LP];
     for (let name of datasetNames) {
         if (SKIP.indexOf(name) !== -1) {
             continue;
         }
-        datasets.push({label: name, data: [], borderColor: getRandomColor(), fill: false});
+        datasets.push(name);
     }
     return datasets;
 };
+
+function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+        ['x', 'Sales', 'Expenses', 'Year', 'Sales', 'Expenses', 'Sales', 'Expenses', 'Year', 'Sales', 'Expenses'],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]);
+
+    var options = {
+        vAxis: {gridlines: {count: 100}},
+        title: 'Company Performance',
+        curveType: 'function',
+        legend: {position: 'bottom'}
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+    chart.draw(data, options);
+}
+
+google.charts.setOnLoadCallback(drawChart);
 
 function createChartInternal(data, datasetNames, segment) {
     chartCounter++;
     $("#charts").append(`
      <div class=" col-sm-${data.columns}" >
-        <canvas id="line-chart${chartCounter}" ></canvas>
+        <div id="line-chart${chartCounter}" ></div>
      </div>`);
 
-    let chart = new Chart.Line(document.getElementById(`line-chart${chartCounter}`).getContext("2d"), {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: createDataSets(datasetNames)
+    let dataSets = createDataSets(datasetNames);
+    var dataStore = google.visualization.arrayToDataTable([dataSets, dataSets.map(e => 0)]);
+    var options = {
+        hAxis: {
+            gridlineColor: 'transparent'
         },
-        options: {
-            scales:
-                {
-                    xAxes: [{
-                        display: false
-                    }]
-                },
-            responsive: true,
-            tooltips: {
-                enabled: true
-            },
-            title: {
-                display: true,
-                text: data.name
-            }, legend: {display: true}
-        }
-    });
-    let datanumber = 0;//s
-    setInterval(() => {
+        title: data.name,
+        curveType: 'function',
+        legend: {position: 'bottom'},
+        animation: {
+            duration: 1000,
+            easing: 'out',
+        },
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById(`line-chart${chartCounter}`));
+    chart.draw(dataStore, options);
+
+    let datanumber = 0;
+    currentIntervals.push(setInterval(() => {
         getBacEndDataCached(data.link).then(function (json) {
+            let numberOfRows = dataStore.getNumberOfRows();
+            if (numberOfRows > MAX_ROWS) {
+                dataStore.removeRow(0)
+            }
             if (segment) {
                 json = json[segment];
             }
-            chart.data.labels.push(datanumber++);
-            if (chart.data.labels.length > 200)
-                chart.data.labels.splice(0, 1);
             if (isNumber(json)) {
-                chart.data.datasets.forEach(function (dataset) {
-                    dataset.data.push(json)
-                    if (dataset.data.length > 200)
-                        dataset.data.splice(0, 1);
-                });
+                dataStore.addRow([datanumber++, json]);
             } else {
-                chart.data.datasets.forEach(function (dataset) {
-                    if (SKIP.indexOf(dataset.label) !== -1) {
-                        return;
+                let row = [datanumber++];
+                for (let data of dataSets) {
+                    if (data !== LP) {
+                        if (isNumber(json[data])) {
+                            row.push(Number(json[data]));
+                        } else {
+                            row.push(datanumber++)
+                        }
+
                     }
-                    dataset.data.push(json[dataset.label]);
-                    if (dataset.data.length > 200)
-                        chart.data.splice(0, 1);
-                });
+                }
+                dataStore.addRow(row);
             }
-            chart.update(0);
+            chart.draw(dataStore, options);
         });
-    }, data.refreshPeriod * 1000);
+    }, data.refreshPeriod * 1000));
 
 }
 
@@ -122,12 +143,3 @@ let getBacEndDataCached = _.memoize(getBackEndData);
 let clearCache = _.debounce(function () {
     getBacEndDataCached.cache.clear();
 }, 5000);
-
-function getRandomColor() {
-    let letters = '0123456789ABCDEF'.split('');
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}

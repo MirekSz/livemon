@@ -1,12 +1,33 @@
 import {clearCurrentCharts, createChart} from './chart';
 
 let dirtyCharts = [];
+let currentChart;
 
 export function initFormHandlers() {
     $("#chartForm").submit(handleSave);
+    $("#importForm").submit(importAction);
     $("#chartForm input[name='link']").blur(checkLink);
     $("#saveAs").click(saveAs);
+    $("#exportAction").click(exportAction);
     restoreSavedCharts();
+}
+
+function exportAction() {
+    let charts = getCharts(currentChart);
+    $("#export").val(JSON.stringify(charts, undefined, 4));
+}
+
+function importAction(e) {
+    e.preventDefault();
+    let data = $("#importForm").serializeArray().reduce(function (previousValue, currentValue) {
+        previousValue[currentValue.name] = currentValue.value;
+        return previousValue;
+    }, {});
+    clearCurrentCharts();
+    for (let chart of JSON.parse(data.json)) {
+        createChart(chart);
+    }
+    $('#importModal').modal('hide');
 }
 
 function restoreSavedCharts() {
@@ -19,11 +40,16 @@ function restoreSavedCharts() {
     for (let save of  Object.keys(savedCharts)) {
         updateSaveAsGUI(save);
     }
-    showLastPanel();
+    let lastSelected = localStorage.getItem('livemon.lastSelected');
+    showLastPanel(lastSelected);
 }
 
-function showLastPanel() {
-    $(".dropdown-menu.saveAs a:last").click();
+function showLastPanel(lastSelected) {
+    if (!lastSelected) {
+        $(".dropdown-menu.saveAs a:last").click();
+    } else {
+        $(`.dropdown-menu.saveAs a:contains('${lastSelected}')`).click();
+    }
 }
 
 function checkLink(e) {
@@ -47,7 +73,10 @@ function updateSaveAsGUI(name) {
     $(".dropdown-menu.saveAs").append(`<a class="dropdown-item" href="#" >${name}</a>`);
     $("#saveAsCounter").html($(".dropdown-item").length);
     $(".dropdown-menu.saveAs a:last").click(() => {
+        debugger;
+        currentChart = name;
         $("#subname").text(` (${name})`);
+        localStorage.setItem('livemon.lastSelected', name);
         let charts = getCharts(name);
         clearCurrentCharts();
         for (let chart of charts) {
