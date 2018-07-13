@@ -73,7 +73,6 @@ function updateSaveAsGUI(name) {
     $(".dropdown-menu.saveAs").append(`<a class="dropdown-item" href="#" >${name}</a>`);
     $("#saveAsCounter").html($(".dropdown-item").length);
     $(".dropdown-menu.saveAs a:last").click(() => {
-        debugger;
         currentChart = name;
         $("#subname").text(` (${name})`);
         localStorage.setItem('livemon.lastSelected', name);
