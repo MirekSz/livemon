@@ -79,31 +79,32 @@ function createChartInternal(data, datasetNames, segment) {
             }, legend: {display: true}
         }
     });
+    let datanumber = 0;//s
     setInterval(() => {
         getBacEndDataCached(data.link).then(function (json) {
             if (segment) {
                 json = json[segment];
             }
-            let na = chart.data.labels.slice(-200);
-            na.push(new Date());
-            chart.data.labels = na;
+            chart.data.labels.push(datanumber++);
+            if (chart.data.labels.length > 200)
+                chart.data.labels.splice(0, 1);
             if (isNumber(json)) {
                 chart.data.datasets.forEach(function (dataset) {
-                    let nd = dataset.data.slice(-200);
-                    nd.push(json);
-                    dataset.data = nd;
+                    dataset.data.push(json)
+                    if (dataset.data.length > 200)
+                        dataset.data.splice(0, 1);
                 });
             } else {
                 chart.data.datasets.forEach(function (dataset) {
-                    let nd = dataset.data.slice(-200);
                     if (SKIP.indexOf(dataset.label) !== -1) {
                         return;
                     }
-                    nd.push(json[dataset.label]);
-                    dataset.data = nd;
+                    dataset.data.push(json[dataset.label]);
+                    if (dataset.data.length > 200)
+                        chart.data.splice(0, 1);
                 });
             }
-            chart.update();
+            chart.update(0);
         });
     }, data.refreshPeriod * 1000);
 
