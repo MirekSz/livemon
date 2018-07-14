@@ -1,6 +1,6 @@
 var chartCounter = 0;
 let currentIntervals = [];
-const MAX_ROWS = 200;
+const MAX_ROWS = 1000;
 
 export function clearCurrentCharts() {
     $("#charts").empty();
