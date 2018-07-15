@@ -4,12 +4,14 @@ const app = express()
 const router = express.Router();
 const request = require('superagent');
 var http = require('http');
+var https = require('https');
 app.use(cors())
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 router.get('/', (req, rres, next) => {
     let link = req.query.link;
     console.log('link: ', link);
 
-    http.request(link, function (response) {
+    https.request(link, function (response) {
         let str = '';
         if (response.statusCode != 200) {
             rres.sendStatus(response.statusCode);

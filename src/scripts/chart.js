@@ -15,7 +15,7 @@ export function createChart(data) {
         success: function (json) {
             if (data.batch) {
                 for (let segment of Object.keys(json)) {
-                    createChartsBaseOnDataType(Object.assign({}, data, {name: segment}), json[segment], segment);
+                    createChartsBaseOnDataType(Object.assign({}, data, { name: segment }), json[segment], segment);
                 }
             } else {
                 createChartsBaseOnDataType(data, json);
@@ -26,7 +26,7 @@ export function createChart(data) {
 
 function createChartsBaseOnDataType(data, json, segment) {
     if (isNumber(json)) {
-        createChartInternal(data, [data.name], segment)
+        createChartInternal(data, [data.name], segment);
     } else {
         for (let key of Object.keys(json)) {
             if (isNumber(json[key])) {
@@ -61,10 +61,10 @@ function drawChart() {
     ]);
 
     var options = {
-        vAxis: {gridlines: {count: 100}},
+        vAxis: { gridlines: { count: 100 } },
         title: 'Company Performance',
         curveType: 'function',
-        legend: {position: 'bottom'}
+        legend: { position: 'bottom' }
     };
 
     var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
@@ -84,12 +84,13 @@ function createChartInternal(data, datasetNames, segment) {
     let dataSets = createDataSets(datasetNames);
     var dataStore = google.visualization.arrayToDataTable([dataSets, dataSets.map(e => 0)]);
     var options = {
+        allowAsync: true,
         hAxis: {
             gridlineColor: 'transparent'
         },
         title: data.name,
         curveType: 'function',
-        legend: {position: 'bottom'},
+        legend: { position: 'bottom' },
         animation: {
             duration: 1000,
             easing: 'out',
@@ -104,7 +105,7 @@ function createChartInternal(data, datasetNames, segment) {
         getBacEndDataCached(data.link).then(function (json) {
             let numberOfRows = dataStore.getNumberOfRows();
             if (numberOfRows > MAX_ROWS) {
-                dataStore.removeRow(0)
+                dataStore.removeRow(0,(numberOfRows-MAX_ROWS));
             }
             if (segment) {
                 json = json[segment];
