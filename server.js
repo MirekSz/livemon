@@ -10,8 +10,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 router.get('/', (req, rres, next) => {
     let link = req.query.link;
     console.log('link: ', link);
-
-    https.request(link, function (response) {
+    let requester = link.startsWith('https') ? https : http;
+    requester.request(link, function (response) {
         let str = '';
         if (response.statusCode != 200) {
             rres.sendStatus(response.statusCode);
