@@ -31,7 +31,6 @@ global.allowDrop = function (ev) {
 global.drag = function (ev) {
     let id = $(ev.target).parent('div')[0].id;
     console.log(id);
-    debugger
     var img = document.createElement("img");
     img.src = "http://kryogenix.org/images/hackergotchi-simpler.png";
     ev.dataTransfer.setDragImage(img, 0, 0);
